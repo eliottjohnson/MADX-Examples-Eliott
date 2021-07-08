@@ -1,0 +1,37 @@
+//Test program by Eliott
+//Opens a sequence file from the PS and outputs the twiss parameters
+//and outputs a graph
+
+TITLE, s='Custom matrix'
+
+option,-echo; // switch off copying the input to the standard output
+
+//Define the beam
+Beam, Particle = proton, energy=25.0; // Energy is in GeV
+
+//Define a custom matrix
+EliottMatrix  : Matrix  , L=1,
+                                        rm11=1.5159, r12=5.9145, r13=0.0, r14=0.0, r15=-0.0, r16=0.0688,
+                                        rm21=1.5159, r22=5.9145, r23=0.0, r24=0.0, r25=-0.0, r26=0.0688,
+                                        rm31=1.5159, r32=5.9145, r33=0.0, r34=0.0, r35=-0.0, r36=0.0688,
+                                        rm41=1.5159, r42=5.9145, r43=0.0, r44=0.0, r45=-0.0, r46=0.0688,
+                                        rm51=1.5159, r52=5.9145, r53=0.0, r54=0.0, r55=-0.0, r56=0.0688,
+                                        rm61=1.5159, r62=5.9145, r63=0.0, r64=0.0, r65=-0.0, r66=0.0688;
+
+//Make the sequence active
+use, sequence=PR.BHT01; 
+
+//Output the lattice functions 
+Select, Flag=Twiss;
+Twiss, File="twiss.txt";
+
+//Output the lattice functions but with a selection pattern
+Select, Flag=Twiss, Pattern = "Q.*";
+Twiss, File="twissPattern.txt";
+
+
+//Plot
+Plot,haxis=s, vaxis=betx,bety,dx,dy, File=plot; //haxis is horizontal axis and vaxis is vertical. File is the location and name of the output file
+
+
+stop;
