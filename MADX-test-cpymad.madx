@@ -1,0 +1,14 @@
+//Test program by Eliott
+//Opens a sequence file from the PS and outputs the twiss parameters
+//and outputs a graph
+
+TITLE, s='Reading from PS seq';
+
+//Read input file with machine description
+call file="MADX-Examples-Eliott/ps_mu.seq";
+option,-echo; // switch off copying the input to the standard output
+
+//Define the beam
+Beam, Particle = proton, sequence=PR.BHU16, energy=25.0; // Energy is in GeV
+
+stop;
