@@ -3,11 +3,12 @@
 These are just a few MADX examples I wrote to better understand how the program works.
 
 ## Instruction
-located on my laptop at C:\Programming\MADX-Examples-Eliott is a MADX-test.madx file
 
-Open linux terminal and run it by using
+Connect to lxplus: `ssh -X eljohnso@lxplus.cern.ch`
 
-./madx-linux64-gnu MADX-examples-Eliott/MADX-test.madx
+Navigate to the location of this repository: `cd /eos/user/e/eljohnso/SWAN_projects/PS stray tracking test/MADX-Examples-Eliott`
 
-This will read the ps_mu.seq file and output a Twiss file and a Graph
+Run the different MAD-X files: `madx filename.madx`
+
+
 
