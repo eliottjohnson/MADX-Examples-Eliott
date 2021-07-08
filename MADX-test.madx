@@ -5,7 +5,7 @@
 TITLE, s='Reading from PS seq';
 
 //Read input file with machine description
-call file="MADX-Examples-Eliott/ps_mu.seq";
+call file="ps_mu.seq";
 option,-echo; // switch off copying the input to the standard output
 
 //Define the beam
@@ -16,15 +16,15 @@ use, sequence=PR.BHT01;
 
 //Output the lattice functions 
 Select, Flag=Twiss;
-Twiss, File="MADX-Examples-Eliott/twiss.txt";
+Twiss, File="twiss.txt";
 
 //Output the lattice functions but with a selection pattern
 Select, Flag=Twiss, Pattern = "Q.*";
-Twiss, File="MADX-Examples-Eliott/twissPattern.txt";
+Twiss, File="twissPattern.txt";
 
 
 //Plot
-Plot,haxis=s, vaxis=betx,bety,dx,dy, File=MADX-Examples-Eliott/plot; //haxis is horizontal axis and vaxis is vertical. File is the location and name of the output file
+Plot,haxis=s, vaxis=betx,bety,dx,dy, File=plot; //haxis is horizontal axis and vaxis is vertical. File is the location and name of the output file
 
 
 stop;
