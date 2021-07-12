@@ -13,10 +13,9 @@ from matplotlib.colors import ListedColormap
 from matplotlib import colors
 
 # constants
-e_C = 1.602176634e-19
-c_m_per_s = 299792458.0
-m0_eV = ((9.38272*6+9.395654*6)-0.93161)*1e8 # C-ions
-mp_kg = 1.6726219e-27
+e_C = 1.602176634e-19     # unit electric charge [C]
+c_m_per_s = 299792458.0   # speed of light [m/s]
+mp_kg = 1.6726219e-27     # proton mass [kg]
 
 def get_ang_from_mom(Px=0, Py=0, Pz=0):
     """ return angle from momentum """
@@ -52,6 +51,8 @@ def get_mom_from_can(px, py, pz, P0):
     return Px, Py, Pz
 
 def interpolate_fieldmap(df, method='linear'):
+    """ interpolate the field map on a 3D regular grid
+    and determine the boundaries of the field grid """
     df.sort_values(by=['x', 'y', 'z'], inplace=True)
     df.reset_index(inplace=True, drop=True)
     xs, ys, zs = df.x.unique(), df.y.unique(), df.z.unique()
@@ -61,13 +62,13 @@ def interpolate_fieldmap(df, method='linear'):
              bounds_error=False, fill_value=None, method=method)
     Bz = RGI((xs, ys, zs), df.Bz.values.reshape((len(xs), len(ys), len(zs))), 
              bounds_error=False, fill_value=None, method=method)
-    # return Bx, By, Bz, [(df.x.min(), df.x.max()), (df.y.min(), df.y.max()), (df.z.min(), df.z.max())]
     return {'Bx': Bx,
             'By': By,
             'Bz': Bz,
             'xbounds': ((df.x.min(), df.x.max()), (df.y.min(), df.y.max()), (df.z.min(), df.z.max()))}
 
-def matrix_rotation(xp, yp):
+def matrix_rotation(xp, yp, zp=0):
+    """ return rotation matrix based on rotation angles around x, y, z axes """
     def Rx(theta):
         return np.array([[ 1, 0           , 0           ],
                          [ 0, m.cos(theta),-m.sin(theta)],
@@ -82,7 +83,19 @@ def matrix_rotation(xp, yp):
                          [ 0           , 0             , 1]])
     return np.dot(Rx(yp), Ry(-xp))
 
+def get_pos_glob(pos, pos_glob, R):
+    """ convert position pos in LCS to GCS
+    based on the global position and the rotation matrix """
+    return np.dot(np.linalg.inv(R), pos) +  pos_glob
+
+def get_mom_glob(mom, R):
+    """ convert momentum mom in LCS to GCS
+    based on the rotation matrix """
+    mom = np.array(mom)
+    return np.dot(np.linalg.inv(R), mom)
+
 def matrix_arr_to_dict(mat):
+    """ convert 6x6 matrix from numpy array to dictionary """
     [[r11, r12, r13, r14, r15, r16],
     [r21, r22, r23, r24, r25, r26],
     [r31, r32, r33, r34, r35, r36],
@@ -97,35 +110,42 @@ def matrix_arr_to_dict(mat):
             'r51': r51, 'r52': r52, 'r53': r53, 'r54': r54, 'r55': r55, 'r56': r56, 
             'r61': r61, 'r62': r62, 'r63': r63, 'r64': r64, 'r65': r65, 'r66': r66}
 
-def slope_intercept(x1, y1, x2, y2):
+def perpendicular_line(x1, y1, x2, y2):
+    """ return a line perpendicular to the one that contains the two points (x1, y1) and (x2, y2) """
     a = (y2 - y1) / (x2 - x1)
     b = y1 - a * x1     
     return a, b 
 
 def cross3(a, b):
+    """ return cross product between two 3D vectors """
     return np.array([a[1] * b[2] - a[2] * b[1],
                      a[2] * b[0] - a[0] * b[2],
                      a[0] * b[1] - a[1] * b[0]])
 
 def plane(vector, point):
+    """ return plane normal to the vector """
     return [vector[0], vector[1], vector[2], -(vector[0]*point[0]+vector[1]*point[1]+vector[2]*point[2])]
 
 def line_param(point1, point2):
+    """ return coefficients of the parametric equation of line between two points """
     lx = point2[0] - point1[0]
     ly = point2[1] - point1[1]
     lz = point2[2] - point1[2]
     return lx, point1[0], ly, point1[1], lz, point1[2]
 
 def point(line_par, plane):
+    """ return intersection point between line and the plane """
     (lx, cx, ly, cy, lz, cz) = line_par
     (a,b,c,d) = plane
     t = -(cx*a + cy*b + cz*c + d)/(a*lx + b*ly + c*lz)
     return lx*t + cx, ly*t + cy, lz*t + cz
 
 def distance( point1, point2):
+    """ return distance between two points """
     return np.linalg.norm(np.array(point1) - np.array(point2))
 
 def remove_mid_el(arr):
+    """ remove the middle element from an array """
     mid_id = round(len(arr)/2)
     return np.concatenate((arr[:mid_id], arr[mid_id+1:]))
 
@@ -156,16 +176,20 @@ class Particle(object):
         self.e0_eV = self.particle['e0']
 
     def get_e0_eV(self):
+        """ return rest energy of the particle in eV """
         return self.e0_eV
 
+    def get_e0_MeV(self):
+        """ return rest energy of the particle in MeV """
+        return self.e0_eV / 1e6
+    
     def get_a(self):
+        """ return mass number """
         return self.a
 
     def get_z(self):
+        """ return atomic number """
         return self.z
-
-    def get_e0_MeV(self):
-        return self.e0_eV / 1e6
     
     def get_en_tot(self, en_per_unit_MeV):
         """ return total energy of particle in eV """
@@ -177,10 +201,12 @@ class Particle(object):
         return np.sqrt(self.get_en_tot(en_per_unit_MeV)**2 - self.e0_eV**2)
 
     def get_en_per_unit_MeV(self, p0c):
+        """ return energy per unit in MeV based on momentum """
         res_ev = np.sqrt(p0c**2 + self.e0_eV**2) - self.e0_eV
         return res_ev * 1e-6 / self.a
 
     def get_en_per_unit_MeV_rig(self, rigidity_Tm):
+        """ return energy per unit in MeV based on rigidity T-m """
         momentum = rigidity_Tm * e_C * self.z # kg.m/s
         e_tot_J = c_m_per_s * np.sqrt(momentum**2 + (self.a * mp_kg * c_m_per_s)**2) # J
         e_tot = e_tot_J / e_C # eV
@@ -196,11 +222,14 @@ class Particle(object):
         return momentum / (e_C * self.z)
 
     def get_lorentz_beta(self, en_per_unit_MeV):
+        """ return the Lorentz beta factor based on energy per unit in MeV"""
         gamma = en_per_unit_MeV / self.get_e0_MeV() + 1
         return np.sqrt(1 - ((1 / gamma)**2))
 
 
-class ATracker(object):
+class SetGenerator(object):
+    """ generate a set of particles for the tracker """
+    
     def __init__(self, particleName):
         assert particleName.lower() in ['proton', 'carbon12'], 'wrong particle name'
         self.particle = Particle(particleName)
@@ -209,104 +238,122 @@ class ATracker(object):
         self.z = self.particle.get_z()
         self.m0_MeV = self.particle.get_e0_MeV()
 
-    def generate_part1_local(self, dist_part_ref, var_name, var_value, pid):
-        """ dist_part_ref is of type dictionary with fields:
-            dX, dXP, dY, dYP, dS, dD, dt.
-            var_value is a string of one of above """
-        dist = dist_part_ref.copy() # copy the reference particle into a new one
-        dist['pid'] = pid
+    def get_part1_local(self, distr_part_ref, var_name, dvar_value, pid):
+        """ distr_part_ref is of type dictionary with fields:
+            dX, dXP, dY, dYP, dS, en_MeV, dD, dt.
+            var_name is a string of one of above
+            dvar_value is the change value applied to var_name field """
+        distr = distr_part_ref.copy() # copy the reference particle into a new one
+        distr['pid'] = pid
         if var_name == 'dD':
-            mom0 = self.particle.get_p0c(dist_part_ref['en_MeV']) * (1 + var_value)
-            dist['en_MeV'] = self.particle.get_en_per_unit_MeV(mom0)
+            mom0 = self.particle.get_p0c(distr_part_ref['en_MeV']) * (1 + dvar_value)
+            distr['en_MeV'] = self.particle.get_en_per_unit_MeV(mom0)
         else:
-            dist[var_name] += var_value
-        return dist
-
-    def get_pos_to_glob(self, pos, glob_org, R):
-        return np.dot(np.linalg.inv(R), pos) +  glob_org
-
-    def get_mom_to_glob(self, mom, R):
-        mom = np.array(mom)
-        return np.dot(np.linalg.inv(R), mom)
-
-    def get_dist_to_glob(self, dist, pos_glob0, ang_glob0):
+            distr[var_name] += dvar_value
+        return distr
+    
+    def get_part1_global(self, distr, pos_glob0, ang_glob0, **kwargs):
+        """ take distribution (distr) of one particle in local coord. system
+        and convert to global coord. system """
         # read out local angles/energy and convert into momentum
-        P_loc = get_mom_from_ang(xp = dist['dXP'],
-                                 yp = dist['dYP'],
-                                 P = self.particle.get_p0c(dist['en_MeV']))
+        P_loc = get_mom_from_ang(xp = distr['dXP'],
+                                 yp = distr['dYP'],
+                                 P = self.particle.get_p0c(distr['en_MeV']))
         # move all to global
         R = matrix_rotation(*ang_glob0)
         # position to global
-        pos_glob = self.get_pos_to_glob(pos = np.array([dist['dX'], dist['dY'], dist['dS']]),
-                                        glob_org = pos_glob0,
-                                        R = R)
+        pos_glob = get_pos_glob(pos = np.array([distr['dX'], distr['dY'], distr['dS']]),
+                                   pos_glob = pos_glob0,
+                                   R = R)
         # momentum to global
-        mom_glob = self.get_mom_to_glob(mom = list(P_loc),
-                                        R = R)
-        return dist['pid'], pos_glob, mom_glob, dist['dt']
+        mom_glob = get_mom_glob(mom = list(P_loc),
+                                   R = R)
+        direction = kwargs.pop("direction", None)
+        if direction is None:
+            return distr['pid'], pos_glob, mom_glob, distr['dt']
+        else:
+            return distr['pid'], pos_glob, mom_glob, distr['dt'], direction
+    
+    def get_partset_global(self, set_local, pos_glob0, ang_glob0, direction=None):
+        """ return the whole set of particles in GCS
+        based on the set in LCS """
+        set_global = []
+        for key, value in set_local.items():
+            set_global.append(self.get_part1_global(distr = value, pos_glob0 = pos_glob0, ang_glob0 = ang_glob0, direction=direction))
+        return set_global
 
-    def generate_part13_local(self, dist_part_ref, dX, dXP, dY, dYP, dt, dD):
+    def get_part13_local(self, distr_part_ref, dX, dXP, dY, dYP, dt, dD):
         """ local information on 13 particles based on offsets and reference particle """
         n_part = 13
         names = ['dX', 'dX', 'dXP', 'dXP', 'dY', 'dY', 'dYP', 'dYP', 'dt', 'dt', 'dD', 'dD']
         vals = [dX, -dX, dXP, -dXP, dY, -dY, dYP, -dYP, dt, -dt, dD, -dD]
-        dist13 = {}
+        distr13 = {}
         for i in range(n_part):
-            dist13[i] = dist_part_ref.copy()
-            dist13[i]['pid'] = i
+            distr13[i] = distr_part_ref.copy()
+            distr13[i]['pid'] = i
             if i > 0:
-                dist13[i] = self.generate_part1_local(dist_part_ref = dist_part_ref,
-                                                      var_name = names[i-1],
-                                                      var_value = vals[i-1],
-                                                      pid = i)
-        return dist13
-    
+                distr13[i] = self.get_part1_local(distr_part_ref = distr_part_ref,
+                                                  var_name = names[i-1],
+                                                  dvar_value = vals[i-1],
+                                                  pid = i)
+        return distr13
+
 
 class Tracks(object):
+    """ work on the set of tracks (list of dataframes, each dataframe corresponds to the track of one particle) """
+    
     def __init__(self, tracks_set, particle, ref_pid=0):
         self.tracks_set = tracks_set
         self.track_ref = tracks_set[ref_pid]
         self.part_name = Particle(particle)
 
     def set_ref_pid(self, ref_pid):
+        """ set the id of the reference particle and the reference track """
         self.ref_pid = ref_pid
         self.track_ref = self.tracks_set[ref_pid]
        
     def get_ref_last_k(self):
+        """ get the last step of the reference particle track """
         return self.track_ref.shape[0]-1
     
     def get_pos_k_global(self, k):
-        """ return position of reference particle at point k """
+        """ return position components of reference particle at point k """
         return np.array([self.track_ref.iloc[k]['x'], self.track_ref.iloc[k]['y'], self.track_ref.iloc[k]['z']])
 
     def get_mom_k_global(self, k):
-        """ return momentum of reference particle at point k """
+        """ return momentum components of reference particle at point k """
         return np.array([self.track_ref.iloc[k]['Px'], self.track_ref.iloc[k]['Py'], self.track_ref.iloc[k]['Pz']])
 
     def get_p0(self, k):
+        """ return momentum scalar of reference particle at point k """
         return np.sqrt((self.get_mom_k_global(k)**2).sum())
 
     def get_system_rotation_matrix(self, k):
+        """ return rotation matrix based on the momentum of reference particle at point k """
         mom_k = self.get_mom_k_global(k)
         return matrix_rotation(*get_ang_from_mom(*mom_k))
 
-    def get_pos_to_loc(self, pos, pos_ref, k):
+    def get_pos_loc(self, pos, pos_ref, k):
+        """ convert position pos in GCS to LCS
+        based on the local position of a particle at point k 
+        and the local position of the reference particle at point k """
         R = self.get_system_rotation_matrix(k)
         return np.dot(R, pos.T - pos_ref.T)
     
-    def get_mom_to_loc(self, mom, k):
+    def get_mom_loc(self, mom, k):
+        """ convert position mom in GCS to LCS at point k """
         R = self.get_system_rotation_matrix(k)
         return np.dot(R, mom.T)
 
     def get_part_at_k(self, pid, k):
-        """ approximate particle information at point k in global coord. system """
+        """ return exact information of the particle of id pid at point k in GCS """
         tref_shape = self.track_ref.shape[0]
         assert k <= tref_shape, 'There is only {} steps in the reference particle track'.format(tr_shape)
 
         df = self.tracks_set[pid]
         pos_k = self.get_pos_k_global(k)
-        df['dist_ref'] = np.sqrt((df['x'] - pos_k[0])**2 + (df['y'] - pos_k[1])**2 + (df['z'] - pos_k[2])**2)
-        dfsort = df.sort_values(by=['dist_ref'])
+        df['distr_ref'] = np.sqrt((df['x'] - pos_k[0])**2 + (df['y'] - pos_k[1])**2 + (df['z'] - pos_k[2])**2)
+        dfsort = df.sort_values(by=['distr_ref'])
 
         # the first closest track point to the reference particle track point for each particle 
         pos_c1 = np.array([float(dfsort.x.iloc[0]), float(dfsort.y.iloc[0]), float(dfsort.z.iloc[0])])
@@ -315,8 +362,8 @@ class Tracks(object):
         
         return pos_c1, mom_c1, t1
     
-    def part_at_k_int(self, pid, k):
-        """ approximate particle information at point k in global coord. system """
+    def get_part_at_k_int(self, pid, k):
+        """ return approximated particle information at point k in global coord. system """
         tref_shape = self.track_ref.shape[0]
         assert k <= tref_shape, 'There is only {} steps in the reference particle track'.format(tr_shape)
 
@@ -326,8 +373,8 @@ class Tracks(object):
         mom_k = self.get_mom_k_global(k)
 
         df = self.tracks_set[pid]
-        df['dist_ref'] = np.sqrt((df['x'] - pos_k[0])**2 + (df['y'] - pos_k[1])**2 + (df['z'] - pos_k[2])**2)
-        dfsort = df.sort_values(by=['dist_ref'])
+        df['distr_ref'] = np.sqrt((df['x'] - pos_k[0])**2 + (df['y'] - pos_k[1])**2 + (df['z'] - pos_k[2])**2)
+        dfsort = df.sort_values(by=['distr_ref'])
 
         # plane normal to the reference vector
         plane_k = plane(vector = mom_k, point = pos_k)
@@ -338,7 +385,7 @@ class Tracks(object):
         pos_c2 = np.array([float(dfsort.x.iloc[1]), float(dfsort.y.iloc[1]), float(dfsort.z.iloc[1])])
         line_c1c2 = line_param(point1 = pos_c1, point2 = pos_c2)
 
-        # intersection point between lines (c1c2) and the plane_k (normal to the reference traj)
+        # intersection point between line (c1c2) and the plane_k (normal to the reference traj)
         ip = point(line_par = line_c1c2, plane = plane_k)
 
         # global position on the reference plane
@@ -369,6 +416,7 @@ class Tracks(object):
         return pos_g, mom_g, t1
 
     def get_tracks_set_loc(self, k):
+        """ return the set of tracks in the LCS of the reference particle at point k """
         tref_shape = self.track_ref.shape[0]
         assert k <= tref_shape, 'There is only {} steps in the reference particle track'.format(tr_shape)
     
@@ -382,11 +430,11 @@ class Tracks(object):
         for pid in range(0, len(self.tracks_set)):
             # approximate particle information at point k in global coord. system
             pos_g, mom_g, t_g = self.get_part_at_k(pid=pid, k=k)
-            #pos_g, mom_g, t_g = self.part_at_k_int(pid=pid, k=k)
+            #pos_g, mom_g, t_g = self.get_part_at_k_int(pid=pid, k=k)
      
             # convert the approximated values to local coordinate system of reference particle
-            pos_l.append(self.get_pos_to_loc(pos_g, pos_k, k))
-            mom_l_ = self.get_mom_to_loc(mom_g, k)
+            pos_l.append(self.get_pos_loc(pos_g, pos_k, k))
+            mom_l_ = self.get_mom_loc(mom_g, k)
             mom_l.append(mom_l_)
             xp_l, yp_l = get_ang_from_mom(*mom_l_)
             ang_l.append(np.array([xp_l, yp_l]))
@@ -397,6 +445,7 @@ class Tracks(object):
         return {'pos_l': pos_l, 'mom_l': mom_l, 'ang_l': ang_l, 'p0': p0, 'D': D, 't': t}
 
     def get_transport_matrix(self, k, ret='mat'):
+        """ return the 1st order 6x6 transport matrix from the beginning to the point k """
         input_res = self.get_tracks_set_loc(0) # for initial offsets
 
         dX = input_res['pos_l'][1][0] - input_res['pos_l'][0][0]
@@ -472,6 +521,8 @@ class Tracks(object):
             return mat, pos_g
         
     def get_madx_matrix(self, mat_arr, k):
+        """ return the transport matrix in the typical madx format 
+        based on the transport matrix mat_arr at point k """
         madx_mat_arr = np.copy(mat_arr)
 
         # get local outputs at point k
@@ -506,58 +557,88 @@ class Tracks(object):
         return madx_mat_arr
 
     def get_track_condition(self):
+        """ return coeffcients of the line that determines the end of tracking for a set of particles
+        based on a previously run single reference particle track """
         z1 = self.track_ref['z'].iloc[-1]
         x1 = self.track_ref['x'].iloc[-1]
         z2 = self.track_ref['z'].iloc[-2]
         x2 = self.track_ref['x'].iloc[-2]
-        a_ref, b_ref = slope_intercept(z1,x1,z2,x2)
+        a_ref, b_ref = perpendicular_line(z1,x1,z2,x2)
         a = -1/a_ref
         b = x1 - a*z1
     
         return (a,b)
     
     def plot_track(self, pid, legend = False, **kwargs):
+        """ plot track of the particle pid """
         track = self.tracks_set[pid]
         
+        label = kwargs.pop("label", None)
+        if label is None:
+            label = "particle " + str(pid)
+            
+        figsize = kwargs.pop("figsize", None)
+        if figsize is None:
+            figsize=(5,5)
+        
         axes = kwargs.pop("axes", None)
-        if axes is None:
-            fig, axes = plt.subplots(2, 1, figsize=(5,5), tight_layout=True, sharex=False)
-        [ax0, ax1] = axes
-
-        ax0.plot(track['z'], track['y'], label = "particle " + str(pid))
-        ax0.set_ylabel('y [m]')
-        ax1.plot(track['z'], track['x'], label = "particle " + str(pid))
-        ax1.set_ylabel('x [m]')
-        ax1.set_xlabel('z [m]')
-
-        if legend:
-            ax0.legend()
-            ax1.legend()
-
-        return axes
+        plot_yz = kwargs.pop("plot_yz", False)
+        if plot_yz is False:
+            
+            if axes is None:
+                fig, axes = plt.subplots(2, 1, figsize=figsize, tight_layout=True, sharex=False)
+            [ax0, ax1] = axes
+            
+            ax0.plot(track['z'], track['y'], label = label)
+            ax0.set_ylabel('y [m]')
+            ax1.plot(track['z'], track['x'], label = label)
+            ax1.set_ylabel('x [m]')
+            ax1.set_xlabel('z [m]')
+            if legend:
+                ax0.legend()
+                ax1.legend()
+            return axes
+            
+        else:
+            if axes is None:
+                fig, ax0 = plt.subplots(1, 1, figsize=figsize, tight_layout=True)
+            else:
+                ax0 = axes
+            ax0.plot(track['z'], track['y'], label = label)
+            ax0.set_ylabel('y [m]')
+            if legend:
+                ax0.legend()            
+            return ax0
     
     def save_ref_to_csv(self, filename):
+        """ save the reference particle trajectory to a csv file """
         ref_trajectory = self.track_ref.copy()
         ref_trajectory = ref_trajectory.drop(columns=['id', 'k', 'Px', 'Py', 'Pz', 't'])
         ref_trajectory.to_csv(filename, index = False)
 
 
 class Fitter(object):
+    """ polynomial fits to a 2D set of points """ 
+    
     def __init__(self, xt, yt):
         self.xt = xt
         self.yt = yt
     
     def get_fit(self, order):
+        """ return the polynomial fit of the given order """
         return np.polyfit(self.xt, self.yt, order)
     
     def get_y_fitted(self, order):
+        """ return the fitted values """
         p = self.get_fit(order)
         return np.polyval(p, self.xt)
     
     def get_residuals(self, order):
+        """ return the residuals between the inputs and fitted values """
         yf = self.get_y_fitted(order)
         return self.yt - yf
     
     def get_rel_errors(self, order):
+        """ return the relative errors of the fitted values """
         res = self.get_residuals(order)
         return res / self.yt

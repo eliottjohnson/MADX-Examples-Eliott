@@ -1,0 +1,39 @@
+MTV001  : MONITOR;  ! luminescent screen on septum
+pointR  : MARKER;   ! exit ring stray field, upstream of 1st quad
+pointS  : MARKER;   ! exit septum
+
+septum16_on() : macro = {
+    
+
+    select, flag=error, range=SEPTUM16;
+    efcomp, order:=0, dkn:= ksmh16_error;
+    select, flag=error, clear;
+    select, flag=error, range=D16STRAY;
+    efcomp, order:=0, dkn:= 0.015;
+    select, flag=error, clear;
+    select, flag=error, range=F16SHIM;
+    efcomp, order:=0, dkn:= 0.021;
+    select, flag=error, clear;
+
+};
+
+
+SEPTUM16: RBEND,L=2.4,ANGLE=0.0;
+D16STRAY: RBEND,L=2.20480,ANGLE=0.0,K1=-.047,K2=0.33;
+
+/* D16STRAY: MATRIX, L = 2.20408, */ 
+/*                  RM11=1.350, */ 
+/*                  RM12=5.705, */ 
+/*                  RM21=0.083, */ 
+/*                  RM22=1.090, */ 
+/*                  RM16=0.079, */ 
+/*                  RM26=0.026, */ 
+/*                  RM33=0.665, */ 
+/*                  RM34=4.878, */
+/*                  RM43=-0.081, */
+/*                  RM44=0.909; */
+
+F16SHIM : RBEND,L=2.19624,ANGLE=0.0,K1=0.0;
+
+SEPTUM16E: MARKER;
+
