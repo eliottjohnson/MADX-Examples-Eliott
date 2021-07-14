@@ -1,0 +1,13 @@
+option, verbose=false, debug=false, echo=false, warn=false, twiss_print=false;
+beam, particle=proton, pc=25;
+S1: sequence, l=10;
+endsequence;
+D16STRAY: rbend, l=2.2048, angle=0.0, k1=-0.047, k2=0.33;
+F16SHIM: rbend, l=2.19624, angle=0.021, k1=0.0;
+seqedit, sequence=S1;
+install, element=D1, class=D16STRAY, at:=2.0;
+install, element=F1, class=F16SHIM, at:=6.0;
+endedit;
+use, sequence=S1;
+twiss, betx=1, bety=1, rmatrix=true;
+quit;
