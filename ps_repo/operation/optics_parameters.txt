@@ -1,0 +1,22 @@
+# MadX expression                            LSA name                                     sequence (optional)       filter expression
+bsw42_x_mm_abs                               PSBEAM/BSW42_ABS_POSITION_X_MM.INJ1          ps                        bsw42_x_mm_abs_active
+bsw42.2_x_mm_abs                             PSBEAM/BSW42_ABS_POSITION_X_MM.INJ2          ps                        bsw42_x_mm_abs_active
+smh26_x_mm_abs                               PSBEAM/SMH26_ABS_POSITION_X_MM               ps                        smh26_x_mm_abs_active
+smh16_x_mm_abs                               PSBEAM/SMH16_ABS_POSITION_X_MM               ps                        smh16_x_mm_abs_active
+beam->beta                                   PSBEAM/BETA_REL                              ps
+# optics at the wire scanners
+table(twiss,PR.BWSH54,BETX)                  PSBWS_OPTICS/Twiss#pr_bwsh54_beta            ps
+table(twiss,PR.BWSH65,BETX)                  PSBWS_OPTICS/Twiss#pr_bwsh65_beta            ps
+table(twiss,PR.BWSH68,BETX)                  PSBWS_OPTICS/Twiss#pr_bwsh68_beta            ps
+table(twiss,PR.BWSV64,BETY)                  PSBWS_OPTICS/Twiss#pr_bwsv64_beta            ps
+table(twiss,PR.BWSV85,BETY)                  PSBWS_OPTICS/Twiss#pr_bwsv85_beta            ps
+table(twiss,PR.BWSH54,DX)*beam->beta         PSBWS_OPTICS/Twiss#pr_bwsh54_disp            ps
+table(twiss,PR.BWSH65,DX)*beam->beta         PSBWS_OPTICS/Twiss#pr_bwsh65_disp            ps
+table(twiss,PR.BWSH68,DX)*beam->beta         PSBWS_OPTICS/Twiss#pr_bwsh68_disp            ps
+table(twiss,PR.BWSV64,DY)*beam->beta         PSBWS_OPTICS/Twiss#pr_bwsv64_disp            ps
+table(twiss,PR.BWSV85,DY)*beam->beta         PSBWS_OPTICS/Twiss#pr_bwsv85_disp            ps
+# optics at the BGIs
+table(twiss,PR.BGI82,BETX)                   PSBGI_OPTICS/Twiss#pr_bgi82_beta             ps
+table(twiss,PR.BGI84,BETY)                   PSBGI_OPTICS/Twiss#pr_bgi84_beta             ps
+table(twiss,PR.BGI82,DX)*beam->beta          PSBGI_OPTICS/Twiss#pr_bgi82_disp             ps
+table(twiss,PR.BGI84,DY)*beam->beta          PSBGI_OPTICS/Twiss#pr_bgi84_disp             ps

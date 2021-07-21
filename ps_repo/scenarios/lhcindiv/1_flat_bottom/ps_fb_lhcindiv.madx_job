@@ -1,0 +1,76 @@
+system, "mkdir output";
+
+/**********************************************************************************
+*
+* MAD-X input script for the injection optics of the LHCINDIV cycle. This configuration
+* only uses LEQ and no PFW at low energy. 
+* 06/03/2021 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_fb_lhcindiv.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="ps_mu.seq";
+call, file="ps_ss.seq";
+call, file="ps_fb_lhcindiv.str";
+call, file="macros.madx";
+
+kf = 0;
+kd = 0;
+
+/**********************************************************************************
+ *             Tune matching using the LEQ to standard working point
+***********************************************************************************/
+
+Qx := 0.210;
+Qy := 0.245;
+
+use, sequence=PS;
+exec, match_tunes_ptc(Qx, Qy);
+
+/**********************************************************************************
+* Low energy quadrupoles tune knobs
+***********************************************************************************/
+
+exec, tunes_leq_knob_factors(Qx, Qy);
+
+exec, write_str_file("./output/ps_fb_lhcindiv.str");
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+! obtain smooth optics functions by slicing the elements
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,1);
+exec, write_ptc_twiss("./output/ps_fb_lhcindiv.tfs");
+
+stop;
+
+/**********************************************************************************
+ * Non-linear chromaticity 
+***********************************************************************************/
+
+use, sequence=PS;
+
+create, table=mytable, column = dp, qx, qy;
+
+qx := table(ptc_twiss_summary, q1);
+qy := table(ptc_twiss_summary, q2);
+
+dp = -0.01;
+dp_max = 0.011;
+
+while (dp <= dp_max){
+        exec, ptc_twiss_macro(2,dp,0);
+        fill, table = mytable; write, table=mytable, file = './ps_fb_lhcindiv_chromaticity_summary.out';
+        dp = dp + 0.001;
+}

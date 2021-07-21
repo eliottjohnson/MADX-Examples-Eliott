@@ -1,0 +1,28 @@
+# MadX name, LSA name, scaling, test trim
+# Proton injection bump
+bsw42_x_mm_abs,	    PSBEAM/BSW42_ABS_POSITION_X_MM.INJ1, 1.0, 1.0
+bsw42_x_mm,         PSBEAM/BSW42_POSITION_X_MM.INJ1,     1.0, 1.0
+bsw42_px_mrad,      PSBEAM/BSW42_ANGLE_PX_MRAD.INJ1,     1.0, 1.0
+bsw42.2_x_mm_abs,   PSBEAM/BSW42_ABS_POSITION_X_MM.INJ2, 1.0, 1.0
+bsw42.2_x_mm,       PSBEAM/BSW42_POSITION_X_MM.INJ2,     1.0, 1.0
+bsw42.2_px_mrad,    PSBEAM/BSW42_ANGLE_PX_MRAD.INJ2,     1.0, 1.0
+
+# Ion injection bump
+smh26_x_mm_abs,     PSBEAM/SMH26_ABS_POSITION_X_MM, 1.0, 1.0
+
+# Extraction bump
+smh16_x_mm_abs,     PSBEAM/SMH16_ABS_POSITION_X_MM,         1.0, 1.0
+smh16_x_mm,         PSBEAM/SMH16_POSITION_X_MM,             1.0, 1.0
+smh16_px_mrad,      PSBEAM/SMH16_ANGLE_PX_MRAD,             1.0, 1.0
+tps15_ortho_x_mm,   PSBEAM/TPS15_ORTHOGONAL_POSITION_X_MM,  1.0, 1.0
+smh16_ortho_x_mm,   PSBEAM/SMH16_ORTHOGONAL_POSITION_X_MM,  1.0, 1.0
+
+# High-energy corrector knobs
+dhzoc_smh16_x_mm,       PSBEAM/DHZOC_SMH16_POSITION_X_MM, 1.0, 1.0
+dhzoc_smh16_px_urad,    PSBEAM/DHZOC_SMH16_ANGLE_PX_URAD, 1.0, 1.0
+dhzoc_qsk19_x_mm,       PSBEAM/DHZOC_QSK19_POSITION_X_MM, 1.0, 1.0
+dhzoc_qsk19_px_urad,    PSBEAM/DHZOC_QSK19_ANGLE_PX_URAD, 1.0, 1.0
+
+#Tune knobs with LEQ
+qx_leq, PSBEAM/QX_LEQ, 1.0, 0.01
+qy_leq, PSBEAM/QY_LEQ, 1.0, 0.01

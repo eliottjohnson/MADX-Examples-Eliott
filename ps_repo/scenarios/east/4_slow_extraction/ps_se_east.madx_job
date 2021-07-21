@@ -1,0 +1,34 @@
+system, "mkdir output";
+
+/**********************************************************************************
+*
+* MAD-X input script for the optics during the slow extraction of the EAST cycle.
+* 30/03/2020 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_se_east.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="ps_mu.seq";
+call, file="ps_ss.seq";
+call, file="ps_se_east.str";
+call, file="macros.madx";
+
+exec, write_str_file("./output/ps_se_east.str");
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+! obtain smooth optics functions by slicing the elements
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,1);
+exec, write_ptc_twiss("./output/ps_se_east.tfs");

@@ -1,0 +1,94 @@
+/**********************************************************************************
+*
+* MAD-X input script for the flat top optics of the LHC ion cycle.
+* 21/10/2019 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_ft_ion.beam";
+BRHO      := BEAM->PC * 3.3356 * 208./54.;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="../../../ps_mu.seq";
+call, file="../../../ps_ss.seq";
+call, file="./ps_ft_ion.str";
+call, file="../../../_scripts/macros.madx";
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,0);
+exec, write_ptc_twiss("ps_ft_ion.tfs");
+
+stop;
+
+/**********************************************************************************
+ *                        Matching using the PFW
+ *
+ * Values based on non-linear chromaticity measurement at flat top 
+ * recorded on 07.12.2018
+***********************************************************************************/
+
+! Qx = 0.23802 + 0.78214*x + -317.07576*x^2
+Qx   := 0.23802;
+Qxp  := 0.78214;
+Qxp2 := -317.07576;
+
+! Qy = 0.27424 + -0.07398*x + -52.17227*x^2
+Qy   := 0.27424;
+Qyp  := -0.07398;
+Qyp2 := -52.17227;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k1prpfwf;
+        vary, name = k1prpfwd;
+        vary, name = k2prpfwf;
+        vary, name = k2prpfwd;
+        use_macro, name = ptc_twiss_macro(2,0,0);
+        constraint, expr = table(ptc_twiss_summary,Q1)  = Qx;
+        constraint, expr = table(ptc_twiss_summary,Q2)  = Qy;
+        constraint, expr = table(ptc_twiss_summary,DQ1) = Qxp;
+        constraint, expr = table(ptc_twiss_summary,DQ2) = Qyp;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k3prpfwf;
+        vary, name = k3prpfwd;
+        use_macro, name = ptc_twiss_macro(3,0,0);
+        constraint, expr = table(nonlin,value,5)  = Qxp2;
+        constraint, expr = table(nonlin,value,10) = Qyp2;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+exec, write_str_file("ps_ft_ion.str");
+
+/**********************************************************************************
+ * Non-linear chromaticity 
+***********************************************************************************/
+
+use, sequence=PS;
+
+create, table=mytable, column = dp, qx, qy;
+
+qx := table(ptc_twiss_summary, q1);
+qy := table(ptc_twiss_summary, q2);
+
+dp = -0.01;
+dp_max = 0.011;
+
+while (dp <= dp_max){
+        exec, ptc_twiss_macro(2,dp,0);
+        fill, table = mytable; write, table=mytable, file = './ps_ft_ion_chromaticity_summary.out';
+        dp = dp + 0.001;
+}

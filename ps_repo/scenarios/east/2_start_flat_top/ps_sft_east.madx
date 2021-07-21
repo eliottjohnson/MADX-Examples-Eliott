@@ -1,0 +1,95 @@
+/**********************************************************************************
+*
+* MAD-X input script for the optics at the start of the flat top of the EAST cycle, 
+* i.e. before the descent of the W8L to zero.
+* 21/10/2019 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_sft_east.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="../../../ps_mu.seq";
+call, file="../../../ps_ss.seq";
+call, file="./ps_sft_east.str";
+call, file="../../../_scripts/macros.madx";
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,0);
+exec, write_ptc_twiss("ps_sft_east.tfs");
+
+stop;
+
+/**********************************************************************************
+ *                        Matching using the PFW
+ *
+ * Values based on non-linear chromaticity measurement along the cycle 
+ * recorded on 01.11.2018
+***********************************************************************************/
+
+! Qx = 0.228 + 0.18602*x + -157.73888*x^2
+Qx   := 0.228;
+Qxp  := 0.18602;
+Qxp2 := -157.73888;
+
+! Qy = 0.31986 + 1.04761*x + -20.30377*x^2
+Qy   := 0.31986;
+Qyp  := 1.04761;
+Qyp2 := -20.30377;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k1prpfwf;
+        vary, name = k1prpfwd;
+        vary, name = k2prpfwf;
+        vary, name = k2prpfwd;
+        use_macro, name = ptc_twiss_macro(2,0,0);
+        constraint, expr = table(ptc_twiss_summary,Q1)  = Qx;
+        constraint, expr = table(ptc_twiss_summary,Q2)  = Qy;
+        constraint, expr = table(ptc_twiss_summary,DQ1) = Qxp;
+        constraint, expr = table(ptc_twiss_summary,DQ2) = Qyp;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k3prpfwf;
+        vary, name = k3prpfwd;
+        use_macro, name = ptc_twiss_macro(3,0,0);
+        constraint, expr = table(nonlin,value,5)  = Qxp2;
+        constraint, expr = table(nonlin,value,10) = Qyp2;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+exec, write_str_file("ps_sft_east.str");
+
+/**********************************************************************************
+ * Non-linear chromaticity 
+***********************************************************************************/
+
+use, sequence=PS;
+
+create, table=mytable, column = dp, qx, qy;
+
+qx := table(ptc_twiss_summary, q1);
+qy := table(ptc_twiss_summary, q2);
+
+dp = -0.01;
+dp_max = 0.011;
+
+while (dp <= dp_max){
+        exec, ptc_twiss_macro(2,dp,0);
+        fill, table = mytable; write, table=mytable, file = './ps_sft_east_chromaticity_summary.out';
+        dp = dp + 0.001;
+}

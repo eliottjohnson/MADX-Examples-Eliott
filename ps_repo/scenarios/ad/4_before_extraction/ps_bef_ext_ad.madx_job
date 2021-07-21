@@ -1,0 +1,108 @@
+system, "mkdir output";
+
+/**********************************************************************************
+*
+* MAD-X input script for the flat top optics of the AD cycle.
+* 30/03/2020 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_bef_ext_ad.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="ps_mu.seq";
+call, file="ps_ss.seq";
+call, file="ps_bef_ext_ad.str";
+call, file="macros.madx";
+
+/**********************************************************************************
+ *                            Matching using the PFW
+ *
+ * Values based on non-linear chromaticity measurement above   
+ * transition recorded on 29.10.2018
+***********************************************************************************/
+
+! Qx = 0.15095 + -1.02664*x + -372.27359*x^2
+Qx   := 0.15095;
+Qxp  := -1.02664;
+Qxp2 := -372.27359;
+
+! Qy = 0.25136 + 0.38814*x + 152.03807*x^2
+Qy   := 0.25136;
+Qyp  := 0.38814;
+Qyp2 := 152.03807;
+
+! During the measurements a delta of dI_W8L = 10A has been applied to separate the tunes.
+! dQ * (-1) has to be added to Qi to correct for this effect.
+dQx = -0.006173162;
+dQy =  0.005986702;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k1prpfwf;
+        vary, name = k1prpfwd;
+        vary, name = k2prpfwf;
+        vary, name = k2prpfwd;
+        use_macro, name = ptc_twiss_macro(2,0,0);
+        constraint, expr = table(ptc_twiss_summary,Q1)  = Qx - dQx;
+        constraint, expr = table(ptc_twiss_summary,Q2)  = Qy - dQy;
+        constraint, expr = table(ptc_twiss_summary,DQ1) = Qxp;
+        constraint, expr = table(ptc_twiss_summary,DQ2) = Qyp;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k3prpfwf;
+        vary, name = k3prpfwd;
+        use_macro, name = ptc_twiss_macro(3,0,0);
+        constraint, expr = table(nonlin,value,5)  = Qxp2;
+        constraint, expr = table(nonlin,value,10) = Qyp2;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+/**********************************************************************************
+* High energy orbit corrector knobs
+***********************************************************************************/
+
+exec, dhzoc_knob_factors;
+
+exec, write_str_file("./output/ps_bef_ext_ad.str");
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+! obtain smooth optics functions by slicing the elements
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,1);
+exec, write_ptc_twiss("./output/ps_bef_ext_ad.tfs");
+
+stop;
+
+/**********************************************************************************
+ * Non-linear chromaticity 
+***********************************************************************************/
+
+use, sequence=PS;
+
+create, table=mytable, column = dp, qx, qy;
+
+qx := table(ptc_twiss_summary, q1);
+qy := table(ptc_twiss_summary, q2);
+
+dp = -0.01;
+dp_max = 0.011;
+
+while (dp <= dp_max){
+        exec, ptc_twiss_macro(2,dp,0);
+        fill, table = mytable; write, table=mytable, file = './ps_bef_ext_ad_chromaticity_summary.out';
+        dp = dp + 0.001;
+}

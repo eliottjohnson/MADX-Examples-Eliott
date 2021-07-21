@@ -1,0 +1,63 @@
+
+save_stitched_sequence(__seq_name__, __optics__): macro = {
+
+    ! Saving all errors to file
+    SELECT, FLAG = ERROR, FULL;
+    ESAVE, FILE = "./jmad/__seq_name_____optics___errors.seq";
+    option, -warn;
+    seqedit, sequence= __seq_name__;
+    flatten;
+    endedit;
+    delete, sequence=ps;
+
+    save, sequence = __seq_name__  , noexpr, 
+    file="./jmad/__seq_name____optics___savedseq.seq", beam;
+    option, warn;
+
+    /***********************************************
+    * Save initial parameters to file for TL usage
+    ***********************************************/
+    assign, echo="./jmad/__seq_name_____optics__.inp";
+
+    betx0 = bumped->betx;
+    bety0 = bumped->bety;
+    alfx0 = bumped->alfx;
+    alfy0 = bumped->alfy;
+
+    dx0 = bumped->dx;
+    dy0 = bumped->dy;
+
+    dpx0 = bumped->dpx;
+    dpy0 = bumped->dpy;
+
+    x0 = bumped->x;
+    y0 = bumped->y;
+    px0 = bumped->px;
+    py0 = bumped->py;
+
+    print, text="/*********************************************************************************";
+    print, text='Initial conditions from MADX stitched model of PS => __seq_name__ for __optics__ optics';
+    print, text="*********************************************************************************/";
+
+    print, text = '';
+    value,betx0;
+    value,bety0;
+          
+    value,alfx0;
+    value,alfy0;
+          
+    value,dx0 ;
+    value,dy0 ;
+          
+    value,x0 ;
+    value,y0 ;
+
+    value,px0 ;
+    value,py0 ;
+
+    value,dpx0;
+    value,dpy0;
+
+    assign, echo=terminal;
+};
+

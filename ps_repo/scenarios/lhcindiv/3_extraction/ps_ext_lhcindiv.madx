@@ -1,0 +1,30 @@
+/**********************************************************************************
+*
+* MAD-X input script for the injection optics of the LHCINDIV cycle. This configuration
+* only uses LEQ and no PFW at low energy. 
+* 06/03/2021 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_ext_lhcindiv.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="../../../ps_mu.seq";
+call, file="../../../ps_ss.seq";
+call, file="./ps_ext_lhcindiv.str";
+call, file="../../../_scripts/macros.madx";
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,0);
+exec, write_ptc_twiss("ps_ext_lhcindiv.tfs");

@@ -1,0 +1,14 @@
+/************************************
+* Centre FF to extracted trajectory
+************************************/
+
+place_stray_field(dstr_x, dstr_px) : macro = {
+
+    SELECT, FLAG= ERROR, CLEAR;
+    SELECT, FLAG= ERROR, PATTERN= "D16STRAY";
+    EALIGN, DX= dstr_x, dtheta= dstr_px;
+
+};
+
+
+

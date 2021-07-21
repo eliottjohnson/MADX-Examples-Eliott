@@ -1,0 +1,100 @@
+/**********************************************************************************
+*
+* MAD-X input script for the flat bottom optics of the bare machine.
+* 17/10/2019 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_pro_bare_machine.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="../../../ps_mu.seq";
+call, file="../../../ps_ss.seq";
+call, file="../../../_scripts/macros.madx";
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,0);
+exec, write_ptc_twiss("ps_pro_bare_machine.tfs");
+
+stop;
+
+/**********************************************************************************
+ *                   Matching using quadrupoles in the SBENDs and 
+ *                    sextupoles and octupoles in the MULTIPOLEs
+ *
+ * Tune values based on non-linear chromaticity measurement at flat bottom 
+ * recorded on 09.04.2018 
+***********************************************************************************/
+
+! Qx = 0.2454 + -5.34645*x + 24.03831*x^2
+Qx   :=  0.2454;
+Qxp  := -5.34645;
+Qxp2 := 24.03831;
+
+! Qy = 0.28368 + -7.16314*x + 42.3747*x^2
+Qy   :=  0.28368;
+Qyp  := -7.16314;
+Qyp2 := 42.3747;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k1prbhf;
+        vary, name = k1prbhd;
+        vary, name = k2prmp;
+        vary, name = k2prmpj;
+        use_macro, name = ptc_twiss_macro(2,0,0);
+        constraint, expr = table(ptc_twiss_summary,Q1)  = Qx;
+        constraint, expr = table(ptc_twiss_summary,Q2)  = Qy;
+        constraint, expr = table(ptc_twiss_summary,DQ1) = Qxp;
+        constraint, expr = table(ptc_twiss_summary,DQ2) = Qyp;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = k3prmpF;
+        vary, name = k3prmpD;
+        use_macro, name = ptc_twiss_macro(3,0,0);
+        constraint, expr = table(nonlin,value,5)  = Qxp2;
+        constraint, expr = table(nonlin,value,10) = Qyp2;
+jacobian,calls=50000,bisec=3;
+ENDMATCH;
+
+/**********************************************************************************
+* Low energy quadrupoles tune knobs
+***********************************************************************************/
+
+exec, tunes_leq_knob_factors(Qx, Qy);
+
+exec, write_str_file("ps_pro_bare_machine.str");
+
+/**********************************************************************************
+ * Non-linear chromaticity 
+***********************************************************************************/
+
+use, sequence=PS;
+
+create, table=mytable, column = dp, qx, qy;
+
+qx := table(ptc_twiss_summary, q1);
+qy := table(ptc_twiss_summary, q2);
+
+dp = -0.01;
+dp_max = 0.011;
+
+while (dp <= dp_max){
+        exec, ptc_twiss_macro(2,dp,0);
+        fill, table = mytable; write, table=mytable, file = './ps_pro_bare_machine_chromaticity_summary.out';
+        dp = dp + 0.001;
+}

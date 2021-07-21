@@ -1,0 +1,255 @@
+<jmad-model-definition name="PS">
+  <optics>
+    <optic name="ps_inj_ad" overlay="false">
+      <init-files>
+        <call-file path="scenarios/ad/0_injection/ps_inj_ad.beam" />
+        <call-file path="scenarios/ad/0_injection/ps_inj_ad.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_qlb_ad" overlay="false">
+      <init-files>
+        <call-file path="scenarios/ad/1_injection_with_qlb/ps_inj_qlb_ad.beam" />
+        <call-file path="scenarios/ad/1_injection_with_qlb/ps_inj_qlb_ad.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_ad" overlay="false">
+      <init-files>
+        <call-file path="scenarios/ad/2_flat_bottom/ps_fb_ad.beam" />
+        <call-file path="scenarios/ad/2_flat_bottom/ps_fb_ad.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_ad" overlay="false">
+      <init-files>
+        <call-file path="scenarios/ad/3_flat_top/ps_ft_ad.beam" />
+        <call-file path="scenarios/ad/3_flat_top/ps_ft_ad.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_bef_ext_ad" overlay="false">
+      <init-files>
+        <call-file path="scenarios/ad/4_before_extraction/ps_bef_ext_ad.beam" />
+        <call-file path="scenarios/ad/4_before_extraction/ps_bef_ext_ad.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ext_ad" overlay="false">
+      <init-files>
+        <call-file path="scenarios/ad/5_extraction/ps_ext_ad.beam" />
+        <call-file path="scenarios/ad/5_extraction/ps_ext_ad.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_pro_bare_machine" overlay="false">
+      <init-files>
+        <call-file path="scenarios/bare_machine/0_proton_injection_energy/ps_pro_bare_machine.beam" />
+        <call-file path="scenarios/bare_machine/0_proton_injection_energy/ps_pro_bare_machine.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ion_bare_machine" overlay="false">
+      <init-files>
+        <call-file path="scenarios/bare_machine/1_ion_injection_energy/ps_ion_bare_machine.beam" />
+        <call-file path="scenarios/bare_machine/1_ion_injection_energy/ps_ion_bare_machine.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_east" overlay="false">
+      <init-files>
+        <call-file path="scenarios/east/0_injection/ps_inj_east.beam" />
+        <call-file path="scenarios/east/0_injection/ps_inj_east.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_east" overlay="false">
+      <init-files>
+        <call-file path="scenarios/east/1_flat_bottom/ps_fb_east.beam" />
+        <call-file path="scenarios/east/1_flat_bottom/ps_fb_east.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_sft_east" overlay="false">
+      <init-files>
+        <call-file path="scenarios/east/2_start_flat_top/ps_sft_east.beam" />
+        <call-file path="scenarios/east/2_start_flat_top/ps_sft_east.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_east" overlay="false">
+      <init-files>
+        <call-file path="scenarios/east/3_flat_top_without_QSE_and_XSE/ps_ft_east.beam" />
+        <call-file path="scenarios/east/3_flat_top_without_QSE_and_XSE/ps_ft_east.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_se_east" overlay="false">
+      <init-files>
+        <call-file path="scenarios/east/4_slow_extraction/ps_se_east.beam" />
+        <call-file path="scenarios/east/4_slow_extraction/ps_se_east.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_lhc" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc/0_injection/ps_inj_lhc.beam" />
+        <call-file path="scenarios/lhc/0_injection/ps_inj_lhc.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_lhc" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc/1_flat_bottom/ps_fb_lhc.beam" />
+        <call-file path="scenarios/lhc/1_flat_bottom/ps_fb_lhc.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_lhc" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc/2_flat_top/ps_ft_lhc.beam" />
+        <call-file path="scenarios/lhc/2_flat_top/ps_ft_lhc.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ext_lhc" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc/3_extraction/ps_ext_lhc.beam" />
+        <call-file path="scenarios/lhc/3_extraction/ps_ext_lhc.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_ion" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc_ion/0_injection/ps_inj_ion.beam" />
+        <call-file path="scenarios/lhc_ion/0_injection/ps_inj_ion.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_ion" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc_ion/1_flat_bottom/ps_fb_ion.beam" />
+        <call-file path="scenarios/lhc_ion/1_flat_bottom/ps_fb_ion.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_ion" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc_ion/2_flat_top/ps_ft_ion.beam" />
+        <call-file path="scenarios/lhc_ion/2_flat_top/ps_ft_ion.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ext_ion" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhc_ion/3_extraction/ps_ext_ion.beam" />
+        <call-file path="scenarios/lhc_ion/3_extraction/ps_ext_ion.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_lhcindiv" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhcindiv/0_injection/ps_inj_lhcindiv.beam" />
+        <call-file path="scenarios/lhcindiv/0_injection/ps_inj_lhcindiv.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_lhcindiv" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhcindiv/1_flat_bottom/ps_fb_lhcindiv.beam" />
+        <call-file path="scenarios/lhcindiv/1_flat_bottom/ps_fb_lhcindiv.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_lhcindiv" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhcindiv/2_flat_top/ps_ft_lhcindiv.beam" />
+        <call-file path="scenarios/lhcindiv/2_flat_top/ps_ft_lhcindiv.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ext_lhcindiv" overlay="false">
+      <init-files>
+        <call-file path="scenarios/lhcindiv/3_extraction/ps_ext_lhcindiv.beam" />
+        <call-file path="scenarios/lhcindiv/3_extraction/ps_ext_lhcindiv.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/0_injection/ps_inj_sftpro.beam" />
+        <call-file path="scenarios/sftpro/0_injection/ps_inj_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_qlb_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/1_injection_with_qlb/ps_inj_qlb_sftpro.beam" />
+        <call-file path="scenarios/sftpro/1_injection_with_qlb/ps_inj_qlb_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/2_flat_bottom/ps_fb_sftpro.beam" />
+        <call-file path="scenarios/sftpro/2_flat_bottom/ps_fb_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/3_flat_top/ps_ft_sftpro.beam" />
+        <call-file path="scenarios/sftpro/3_flat_top/ps_ft_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_rc_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/4_resonance_crossing/ps_rc_sftpro.beam" />
+        <call-file path="scenarios/sftpro/4_resonance_crossing/ps_rc_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_hs_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/5_horizontal_splitting/ps_hs_sftpro.beam" />
+        <call-file path="scenarios/sftpro/5_horizontal_splitting/ps_hs_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_pr_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/6_phase_rotation/ps_pr_sftpro.beam" />
+        <call-file path="scenarios/sftpro/6_phase_rotation/ps_pr_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ext_sftpro" overlay="false">
+      <init-files>
+        <call-file path="scenarios/sftpro/7_extraction/ps_ext_sftpro.beam" />
+        <call-file path="scenarios/sftpro/7_extraction/ps_ext_sftpro.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_tof" overlay="false">
+      <init-files>
+        <call-file path="scenarios/tof/0_injection/ps_inj_tof.beam" />
+        <call-file path="scenarios/tof/0_injection/ps_inj_tof.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_inj_qlb_tof" overlay="false">
+      <init-files>
+        <call-file path="scenarios/tof/1_injection_with_qlb/ps_inj_qlb_tof.beam" />
+        <call-file path="scenarios/tof/1_injection_with_qlb/ps_inj_qlb_tof.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_fb_tof" overlay="false">
+      <init-files>
+        <call-file path="scenarios/tof/2_flat_bottom/ps_fb_tof.beam" />
+        <call-file path="scenarios/tof/2_flat_bottom/ps_fb_tof.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ft_tof" overlay="false">
+      <init-files>
+        <call-file path="scenarios/tof/3_flat_top/ps_ft_tof.beam" />
+        <call-file path="scenarios/tof/3_flat_top/ps_ft_tof.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+    <optic name="ps_ext_tof" overlay="false">
+      <init-files>
+        <call-file path="scenarios/tof/4_extraction/ps_ext_tof.beam" />
+        <call-file path="scenarios/tof/4_extraction/ps_ext_tof.str" parse="STRENGTHS" />
+      </init-files>
+    </optic>
+  </optics>
+  <default-optic ref-name="ps_fb_lhc" />
+  <sequences>
+    <sequence name="ps">
+      <ranges>
+        <range name="ALL">
+          <twiss-initial-conditions name="default-twiss">
+            <chrom value="true" />
+            <centre value="true" />
+          </twiss-initial-conditions>
+        </range>
+      </ranges>
+      <default-range ref-name="ALL" />
+    </sequence>
+  </sequences>
+  <default-sequence ref-name="ps" />
+  <init-files>
+    <call-file path="ps_mu.seq" />
+    <call-file path="ps_ss.seq" />
+  </init-files>
+  <path-offsets>
+    <repository-prefix value="../" />
+    <resource-prefix value="./" />
+  </path-offsets>
+</jmad-model-definition>

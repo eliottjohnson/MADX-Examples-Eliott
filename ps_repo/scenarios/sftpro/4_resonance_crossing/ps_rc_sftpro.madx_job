@@ -1,0 +1,54 @@
+system, "mkdir output";
+
+/**********************************************************************************
+*
+* MAD-X input script for the moment of resonance crossing on the SFTPRO cycle, 
+* corresponding to 720 ms cycle time. 
+* 30/03/2020 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_rc_sftpro.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="ps_mu.seq";
+call, file="ps_ss.seq";
+call, file="ps_rc_sftpro.str";
+call, file="macros.madx";
+
+/**********************************************************************************
+ *                                  Tune matching
+***********************************************************************************/
+
+Qx := 0.2500;
+! vertical tune according to 2015 chromaticity measurement
+Qy := 0.29826;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = kf;
+        vary, name = kd;
+        use_macro, name = ptc_twiss_macro(2,0,0);
+        constraint, expr = table(ptc_twiss_summary,Q1)  = Qx;
+        constraint, expr = table(ptc_twiss_summary,Q2)  = Qy;
+jacobian,calls=50000,bisec=3, tolerance = 1E-15;
+ENDMATCH;
+
+exec, write_str_file("./output/ps_rc_sftpro.str");
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+! obtain smooth optics functions by slicing the elements
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,1);
+exec, write_ptc_twiss("./output/ps_rc_sftpro.tfs");
+

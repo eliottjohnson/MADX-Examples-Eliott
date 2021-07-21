@@ -1,0 +1,47 @@
+/**********************************************************************************
+*
+* MAD-X input script for the flat bottom optics of the SFTPRO cycle.
+* 16/03/2020 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_fb_sftpro.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="../../../ps_mu.seq";
+call, file="../../../ps_ss.seq";
+call, file="./ps_fb_sftpro.str";
+call, file="../../../_scripts/macros.madx";
+
+/**********************************************************************************
+ * PTC Twiss
+***********************************************************************************/
+
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,0);
+exec, write_ptc_twiss("ps_fb_sftpro.tfs");
+
+stop;
+
+/**********************************************************************************
+ *                                 Tune matching
+ *
+ * Based on tune measurements at injection on 24.06.2021. 
+***********************************************************************************/
+
+Qx := 0.125;
+Qy := 0.305;
+
+use, sequence=PS;
+exec, match_tunes_ptc(Qx, Qy);
+
+exec, tunes_leq_knob_factors(Qx, Qy);
+
+exec, write_str_file("ps_fb_sftpro.str");

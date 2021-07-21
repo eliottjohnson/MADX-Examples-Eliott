@@ -1,0 +1,114 @@
+system, "mkdir output";
+
+/**********************************************************************************
+*
+* MAD-X input script for the MTE extraction configuration on the SFTPRO cycle.
+* 18/03/2021 - Alexander Huschauer
+************************************************************************************/
+ 
+/******************************************************************
+ * Energy and particle type definition
+ ******************************************************************/
+
+call, file="ps_ext_sftpro.beam";
+BRHO      := BEAM->PC * 3.3356;
+
+/******************************************************************
+ * Call lattice files
+ ******************************************************************/
+
+call, file="ps_mu.seq";
+call, file="ps_ss.seq";
+call, file="ps_ext_sftpro.str";
+call, file="macros.madx";
+
+/**********************************************************************************
+ *                                  Tune matching
+ *         Matching has to be performed with extraction bumpers OFF
+***********************************************************************************/
+
+exec, unassign_BSW16;
+
+Qx := 0.268507;
+! vertical tune according to 2015 chromaticity measurement
+Qy := 0.29826;
+
+use, sequence=PS;
+match, use_macro;
+        vary, name = kf;
+        vary, name = kd;
+        use_macro, name = ptc_twiss_macro(2,0,0);
+        constraint, expr = table(ptc_twiss_summary,Q1)  = Qx;
+        constraint, expr = table(ptc_twiss_summary,Q2)  = Qy;
+jacobian,calls=50000,bisec=3, tolerance = 1E-15;
+ENDMATCH;
+
+/**********************************************************************************
+* Extraction bump matching
+* The bump amplitude is based on 2018 LSA settings, when operationally all four bumpers
+* were used.
+* This matching uses all bumpers to close the bump in addition.
+***********************************************************************************/
+
+use, sequence=PS;
+
+! 2018 settings as initial conditions
+kpebsw12           =    0.0026498627500052318;
+kpebsw14           =   -0.0028463620077075285;
+kpebsw20           =    0.0026498627500052318;
+kpebsw22           =   -0.0028089039407327436;
+
+x0 = 0.011;
+px0 = -2E-3;
+
+exec, match_bsw16_bump(2);     
+
+/**********************************************************************************
+* Extraction bump knobs
+***********************************************************************************/
+
+exec, bsw16_knob_factors(2);
+
+/**********************************************************************************
+* High energy orbit corrector knobs
+***********************************************************************************/
+
+exec, dhzoc_knob_factors;
+
+exec, write_str_file("./output/ps_ext_sftpro.str");
+
+/******************************************************************
+ * Define fourfold PS sequence for Twiss in the islands
+ ******************************************************************/
+
+use, sequence = PS;
+twiss;
+PSL = table(summ, length);
+
+PS4: SEQUENCE, L = 4*PSL, refer = entry;
+PS, at = 0.0;
+PS, at = PSL;
+PS, at = 2*PSL;
+PS, at = 3*PSL;
+ENDSEQUENCE;
+
+/**********************************************************************************
+ * PTC Twiss for the core
+***********************************************************************************/
+
+! obtain smooth optics functions by slicing the elements
+use, sequence=PS;
+exec, ptc_twiss_macro(2,0,1);
+exec, write_ptc_twiss("./output/ps_ext_sftpro.tfs");
+
+/**********************************************************************************
+ * PTC Twiss for the islands
+***********************************************************************************/
+
+x = 0.051;
+px = -0.0016;
+
+! obtain smooth optics functions by slicing the elements
+use, sequence=PS4;
+exec, ptc_twiss_MTE_macro(2,x,px,1);
+exec, write_ptc_twiss("./output/ps_ext_sftpro_islands.tfs");
