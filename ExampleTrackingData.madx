@@ -19,7 +19,7 @@ use, sequence=PR.BHT01;
 //with trackfile=basis.
 
 // track particles
-track, file=basis, dump, onetable;
+track, file=basis, dump, onetable; //onetable creates a unique table but if you need individual particles you can omit "onetable" and you'll have the four tables.
 start, x= 2e-3, px=0, y= 2e-3, py=0;
 start, x= 4e-3, px=0, y= 4e-3, py=0;
 start, x= 6e-3, px=0, y= 6e-3, py=0;
