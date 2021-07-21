@@ -15,7 +15,7 @@ SETPLOT, POST=2, FONT=-1;
 USE, PERIOD=FODO;
 TWISS,SAVE,BETX=15.0,BETY=5.0;
 
-PLOT,HAXIS=S, VAXIS=BETX, BETY NOVERSION=TRUE, TITLE="unmatched beta functions"; //Plot the first unmatched graph
+PLOT,HAXIS=S, VAXIS=BETX, BETY, NOVERSION=TRUE, TITLE="unmatched beta functions"; //Plot the first unmatched graph
 
 //Here MATCH is used as a single ocmmand this finds periodic solution
 USE, PERIOD=FODO;
@@ -27,7 +27,7 @@ Value, TABLE(SUMM,Q1);
 Value, TABLE(SUMM,Q2);
 WRITE,TABLE=SUMM,FILE=FODO.txt;
 
-//Plot the files running
+//Plot the files by running
 //gs -dEPSCrop -c "<</Orientation 3>> setpagedevice" -f madx01.eps -c quit
 //gs -dEPSCrop -c "<</Orientation 3>> setpagedevice" -f madx02.eps -c quit
 
