@@ -1,4 +1,8 @@
 $$
+R_{12}
+$$
+
+$$
 
 \left(\begin{array}{c}
 {\pmb{x^{New}}}  \\
