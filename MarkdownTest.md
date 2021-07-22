@@ -1,4 +1,4 @@
-$$\begin{equation}
+\begin{equation}
 \left(\begin{array}{c}
 {\pmb{x^{New}}}  \\
 {x'^{New}}  \\
@@ -23,4 +23,4 @@ R_{61} & R_{62} & R_{63} & R_{64} & R_{65} & R_{66} \\
 {0}  \\
 {0}  \\
 \end{array}\right)
-\end{equation}$$
+\end{equation}
